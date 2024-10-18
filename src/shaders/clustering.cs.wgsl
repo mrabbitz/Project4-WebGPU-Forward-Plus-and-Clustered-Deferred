@@ -114,7 +114,7 @@ fn main(@builtin(global_invocation_id) globalIdx: vec3u) {
 
     // Initialize a counter for the number of lights in this cluster
     var cluster_lightCount: u32 = 0u;
-    var cluster_lightIndices: array<u32, ${maxLightsPerCluster}> = array<u32, ${maxLightsPerCluster}>();
+    // var cluster_lightIndices: array<u32, ${maxLightsPerCluster}> = array<u32, ${maxLightsPerCluster}>();
 
     // For each light
     for (var lightIdx: u32 = 0u; lightIdx < lightSet.numLights; lightIdx++) {
@@ -124,7 +124,8 @@ fn main(@builtin(global_invocation_id) globalIdx: vec3u) {
         if (sphereAabbIntersectionTest(view_light_pos.xyz, ${lightRadius}, aabbMin, aabbMax)) {
             // Add this light to the cluster's light list if there is space
             if (cluster_lightCount < ${maxLightsPerCluster}) {
-                cluster_lightIndices[cluster_lightCount] = lightIdx;
+                // cluster_lightIndices[cluster_lightCount] = lightIdx;
+                clusterSet.clusters[clusterIdx].lightIndices[cluster_lightCount] = lightIdx;
                 cluster_lightCount++;
             } else {
                 // Stop early if the cluster's light list is full
@@ -137,9 +138,9 @@ fn main(@builtin(global_invocation_id) globalIdx: vec3u) {
     clusterSet.clusters[clusterIdx].lightCount = cluster_lightCount;
 
     // Update this cluster's light list
-    if (cluster_lightCount > 0u) {
-        for (var i: u32 = 0u; i < cluster_lightCount; i++) {
-            clusterSet.clusters[clusterIdx].lightIndices[i] = cluster_lightIndices[i];
-        }
-    }
+    // if (cluster_lightCount > 0u) {
+    //     for (var i: u32 = 0u; i < cluster_lightCount; i++) {
+    //         clusterSet.clusters[clusterIdx].lightIndices[i] = cluster_lightIndices[i];
+    //     }
+    // }
 }
