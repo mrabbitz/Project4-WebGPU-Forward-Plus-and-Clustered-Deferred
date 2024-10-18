@@ -21,8 +21,6 @@
 @group(${bindGroup_material}) @binding(0) var diffuseTex: texture_2d<f32>;
 @group(${bindGroup_material}) @binding(1) var diffuseTexSampler: sampler;
 
-const EPSILON = 1e-5;
-
 struct FragmentInput
 {
     @location(0) pos: vec3f,
@@ -40,42 +38,35 @@ fn main(in: FragmentInput) -> @location(0) vec4f
 
     // Determine which cluster contains the current fragment
     let clip_pos = cameraUniforms.viewProjMat * vec4(in.pos, 1.0);
-    let ndc_pos = clip_pos.xyz / clip_pos.w;
-    var ndc_pos_0_1 = ndc_pos * 0.5 + 0.5;
-    ndc_pos_0_1.x = clamp(ndc_pos_0_1.x, 0.0, 1.0 - EPSILON);
-    ndc_pos_0_1.y = clamp(ndc_pos_0_1.y, 0.0, 1.0 - EPSILON);
-    let clusterIdx_x = u32(floor(ndc_pos_0_1.x * f32(clusterSet.clusterCountX)));
-    let clusterIdx_y = u32(floor(ndc_pos_0_1.y * f32(clusterSet.clusterCountY)));
+    let ndc_pos = clip_pos.xy / clip_pos.w;  // Using only x and y
+    let ndc_pos_0_1 = clamp((ndc_pos * 0.5) + 0.5, vec2f(0.0), vec2f(1.0));
+    let clusterIdx_x = u32(ndc_pos_0_1.x * f32(clusterSet.clusterCountX));
+    let clusterIdx_y = u32(ndc_pos_0_1.y * f32(clusterSet.clusterCountY));
 
-    // Calculate the depth partition (Z cluster index)
     let view_pos = cameraUniforms.viewMat * vec4(in.pos, 1.0);
     let view_depth_step = pow(cameraUniforms.farPlane / cameraUniforms.nearPlane, 1.0 / f32(clusterSet.clusterCountZ));
-    let view_depth_partition = u32(log(view_pos.z / cameraUniforms.nearPlane) / log(view_depth_step));
+    let clusterIdx_z = u32(log(view_pos.z / cameraUniforms.nearPlane) / log(view_depth_step));
 
-    // Compute the cluster index based on X, Y, and Z coordinates
-    var clusterIdx = clusterIdx_x + 
-                     clusterIdx_y * clusterSet.clusterCountX + 
-                     view_depth_partition * clusterSet.clusterCountX * clusterSet.clusterCountY;
-    
-    clusterIdx = clamp(clusterIdx, 0u, clusterSet.clusterCount - 1u);
+    let clusterIdx = clamp(clusterIdx_x + (clusterIdx_y * clusterSet.clusterCountX) + (clusterIdx_z * clusterSet.clusterCountX * clusterSet.clusterCountY), 0, clusterSet.clusterCount - 1);
 
-    // Get the cluster bounds (AABB) for the current cluster
+    // Retrieve the number of lights that affect the current fragment from the cluster’s data
     let cluster = clusterSet.clusters[clusterIdx];
-    let aabbMin = cluster.aabbMin;
-    let aabbMax = cluster.aabbMax;
+    let lightCount = cluster.lightCount;
 
-    // Initialize total light contribution for the current fragment
+    // Initialize a variable to accumulate the total light contribution for the fragment
     var totalLightContribution = vec3f(0, 0, 0);
 
-    // Iterate over lights in the cluster
-    let lightCount = cluster.lightCount;
+    // For each light in the cluster
     for (var i = 0u; i < lightCount; i++) {
-        let lightIdx = cluster.lightIndices[i];
-        let light = lightSet.lights[lightIdx];
+        // Access the light's properties using its index
+        let light = lightSet.lights[cluster.lightIndices[i]];
+        // Calculate the contribution of the light based on its position, the fragment’s position, and the surface normal
+        // Add the calculated contribution to the total light accumulation
         totalLightContribution += calculateLightContrib(light, in.pos, in.nor);
     }
 
-    // Compute the final color by multiplying the diffuse color by the accumulated light contribution
+    // Multiply the fragment’s diffuse color by the accumulated light contribution
     let finalColor = diffuseColor.rgb * totalLightContribution;
+    // Return the final color, ensuring that the alpha component is set appropriately (typically to 1)
     return vec4(finalColor, 1.0);
 }

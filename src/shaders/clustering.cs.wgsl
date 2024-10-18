@@ -25,18 +25,10 @@
 @group(${bindGroup_scene}) @binding(1) var<storage, read> lightSet: LightSet;
 @group(${bindGroup_scene}) @binding(2) var<storage, read_write> clusterSet: ClusterSet;
 
-const EPSILON = 1e-5;
-
 struct ClusterBounds {
-    min: vec3f,
-    max: vec3f
+    aabbMin: vec3f,
+    aabbMax: vec3f
 };
-
-fn viewZToNDCz(viewZ: f32, projMat: mat4x4<f32>) -> f32 {
-    let clipZ = projMat[2][2] * viewZ + projMat[3][2];
-    let clipW = projMat[2][3] * viewZ + projMat[3][3];
-    return clipZ / clipW;
-}
 
 // Function to compute the AABB for a cluster in view space
 fn computeClusterBounds(clusterIdx: u32) -> ClusterBounds {
@@ -44,53 +36,57 @@ fn computeClusterBounds(clusterIdx: u32) -> ClusterBounds {
     let clusterIdx_y: u32 = (clusterIdx / clusterSet.clusterCountX) % clusterSet.clusterCountY;
     let clusterIdx_z: u32 = clusterIdx / (clusterSet.clusterCountX * clusterSet.clusterCountY);
 
-    // Calculate the screen-space (NDC) bounds for this cluster in 2D (XY)
-    let ndc_cluster_width:  f32 = 2.0 / f32(clusterSet.clusterCountX);
-    let ndc_cluster_height: f32 = 2.0 / f32(clusterSet.clusterCountY);
-    let ndc_cluster_minX:   f32 = -1.0 + f32(clusterIdx_x) * ndc_cluster_width;
-    let ndc_cluster_minY:   f32 = -1.0 + f32(clusterIdx_y) * ndc_cluster_height;
-    let ndc_cluster_maxX:   f32 = min(ndc_cluster_minX + ndc_cluster_width, 1.0 - EPSILON);
-    let ndc_cluster_maxY:   f32 = min(ndc_cluster_minY + ndc_cluster_height, 1.0 - EPSILON);
+    // Calculate the screen-space bounds for this cluster in 2D (XY)
+    let ndc_width:  f32 = 2.0 / f32(clusterSet.clusterCountX);
+    let ndc_height: f32 = 2.0 / f32(clusterSet.clusterCountY);
+    let ndc_min_x:  f32 = -1.0 + f32(clusterIdx_x) * ndc_width;
+    let ndc_min_y:  f32 = -1.0 + f32(clusterIdx_y) * ndc_height;
+    let ndc_max_x:  f32 = min(ndc_min_x + ndc_width, 1.0);
+    let ndc_max_y:  f32 = min(ndc_min_y + ndc_height, 1.0);
 
-    // Calculate the ratio for the depth partitioning in view space
+    // Calculate the depth bounds for this cluster in Z (near and far planes)
     let view_depth_step: f32 = pow(cameraUniforms.farPlane / cameraUniforms.nearPlane, 1.0 / f32(clusterSet.clusterCountZ));
+    let view_min_z:  f32 = cameraUniforms.nearPlane * pow(view_depth_step, f32(clusterIdx_z));
+    let view_max_z:  f32 = view_min_z * view_depth_step;
 
-    // Calculate view-space Z bounds for the current cluster then transform to screen-space (NDC)
-    let ndc_cluster_minZ: f32 = viewZToNDCz(cameraUniforms.nearPlane * pow(view_depth_step, f32(clusterIdx_z)), cameraUniforms.projMat);
-    let ndc_cluster_maxZ: f32 = viewZToNDCz(cameraUniforms.nearPlane * pow(view_depth_step, f32(clusterIdx_z + 1u)), cameraUniforms.projMat);
+    let clip_min_z:  f32 = cameraUniforms.projMat[2][2] * view_min_z + cameraUniforms.projMat[3][2];
+    let clip_min_w:  f32 = cameraUniforms.projMat[2][3] * view_min_z + cameraUniforms.projMat[3][3];
+    let clip_max_z:  f32 = cameraUniforms.projMat[2][2] * view_max_z + cameraUniforms.projMat[3][2];
+    let clip_max_w:  f32 = cameraUniforms.projMat[2][3] * view_max_z + cameraUniforms.projMat[3][3];
 
-    let ndc_cluster_corners: array<vec4f, 8> = array<vec4f, 8>(
-        vec4f(ndc_cluster_minX, ndc_cluster_minY, ndc_cluster_minZ, 1.0),
-        vec4f(ndc_cluster_minX, ndc_cluster_minY, ndc_cluster_maxZ, 1.0),
-        vec4f(ndc_cluster_minX, ndc_cluster_maxY, ndc_cluster_minZ, 1.0),
-        vec4f(ndc_cluster_minX, ndc_cluster_maxY, ndc_cluster_maxZ, 1.0),
-        vec4f(ndc_cluster_maxX, ndc_cluster_minY, ndc_cluster_minZ, 1.0),
-        vec4f(ndc_cluster_maxX, ndc_cluster_minY, ndc_cluster_maxZ, 1.0),
-        vec4f(ndc_cluster_maxX, ndc_cluster_maxY, ndc_cluster_minZ, 1.0),
-        vec4f(ndc_cluster_maxX, ndc_cluster_maxY, ndc_cluster_maxZ, 1.0)
+    let ndc_min_z:   f32 = clip_min_z / clip_min_w;
+    let ndc_max_z:   f32 = clip_max_z / clip_max_w;
+
+    // Convert these screen and depth bounds into view-space coordinates and determine (AABB) for the cluster
+    var view_min: vec3f = vec3f(1e10, 1e10, 1e10);
+    var view_max: vec3f = vec3f(-1e10, -1e10, -1e10);
+
+    let ndc_corners: array<vec4f, 8> = array<vec4f, 8>(
+        vec4f(ndc_min_x, ndc_min_y, ndc_min_z, 1.0),
+        vec4f(ndc_min_x, ndc_min_y, ndc_max_z, 1.0),
+        vec4f(ndc_min_x, ndc_max_y, ndc_min_z, 1.0),
+        vec4f(ndc_min_x, ndc_max_y, ndc_max_z, 1.0),
+        vec4f(ndc_max_x, ndc_min_y, ndc_min_z, 1.0),
+        vec4f(ndc_max_x, ndc_min_y, ndc_max_z, 1.0),
+        vec4f(ndc_max_x, ndc_max_y, ndc_min_z, 1.0),
+        vec4f(ndc_max_x, ndc_max_y, ndc_max_z, 1.0)
     );
 
-    var view_cluster_corners: array<vec3f, 8> = array<vec3f, 8>();
     for (var i = 0u; i < 8u; i++) {
-        let view_pos: vec4f = cameraUniforms.invProjMat * ndc_cluster_corners[i];
-        view_cluster_corners[i] = view_pos.xyz / view_pos.w;
+        let view_pos: vec4f = cameraUniforms.invProjMat * ndc_corners[i];
+        let view_corner: vec3f = view_pos.xyz / view_pos.w;
+        view_min = min(view_min, view_corner);
+        view_max = max(view_max, view_corner);
     }
 
-    var view_cluster_min: vec3f = view_cluster_corners[0];
-    var view_cluster_max: vec3f = view_cluster_corners[0];
-    for (var i = 1u; i < 8u; i++) {
-        view_cluster_min = min(view_cluster_min, view_cluster_corners[i]);
-        view_cluster_max = max(view_cluster_max, view_cluster_corners[i]);
-    }
-
-    return ClusterBounds(view_cluster_min, view_cluster_max);
+    return ClusterBounds(view_min, view_max);
 }
 
 // Function to check if a light (as a sphere) intersects a cluster's AABB
-fn sphereIntersectsAABB(sphereCenter: vec3f, sphereRadius: f32, aabbMin: vec3f, aabbMax: vec3f) -> bool {
-    let closestPoint = clamp(sphereCenter, aabbMin, aabbMax);
-    let distance = length(sphereCenter - closestPoint);
-    return distance <= sphereRadius;
+fn sphereAabbIntersectionTest(c: vec3f, r: f32, aabbMin: vec3f, aabbMax: vec3f) -> bool {
+    let closestPoint = clamp(c, aabbMin, aabbMax);
+    // Returns true if the distance from the sphere center to the closest point on the AABB is less than or equal to the sphere's radius
+    return length(c - closestPoint) <= r;
 }
 
 @compute
@@ -105,8 +101,8 @@ fn main(@builtin(global_invocation_id) globalIdx: vec3u) {
     // Compute the AABB for this cluster in view space
     // ------------------------------------
     let clusterBounds: ClusterBounds = computeClusterBounds(clusterIdx);
-    let aabbMin: vec3f = clusterBounds.min;
-    let aabbMax: vec3f = clusterBounds.max;
+    let aabbMin: vec3f = clusterBounds.aabbMin;
+    let aabbMax: vec3f = clusterBounds.aabbMax;
 
     // Store the computed bounding box (AABB) for the cluster
     clusterSet.clusters[clusterIdx].aabbMin = aabbMin;
@@ -122,10 +118,10 @@ fn main(@builtin(global_invocation_id) globalIdx: vec3u) {
 
     // For each light
     for (var lightIdx: u32 = 0u; lightIdx < lightSet.numLights; lightIdx++) {
-        let view_light_pos = cameraUniforms.viewMat * vec4f(lightSet.lights[lightIdx].pos, 1.0);
+        let view_light_pos: vec4f = cameraUniforms.viewMat * vec4f(lightSet.lights[lightIdx].pos, 1.0);
 
         // Check if the light intersects with the cluster’s bounding box (AABB)
-        if (sphereIntersectsAABB(view_light_pos.xyz, ${lightRadius}, aabbMin, aabbMax)) {
+        if (sphereAabbIntersectionTest(view_light_pos.xyz, ${lightRadius}, aabbMin, aabbMax)) {
             // Add this light to the cluster's light list if there is space
             if (cluster_lightCount < ${maxLightsPerCluster}) {
                 cluster_lightIndices[cluster_lightCount] = lightIdx;
