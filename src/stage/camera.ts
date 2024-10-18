@@ -5,7 +5,7 @@ import { device, canvas, fovYDegrees, aspectRatio } from "../renderer";
 class CameraUniforms {
     // floatView is a typed view (Float32Array) over buffer (ArrayBuffer)
     // Any changes made to floatView directly affect the contents of buffer
-    readonly buffer = new ArrayBuffer(16 * 4);
+    readonly buffer = new ArrayBuffer(416); // 26 16 byte chunks required for total of 416 bytes, although we only use 103 floats * 4 bytes = 412.
     private readonly floatView = new Float32Array(this.buffer);
 
     set viewProjMat(mat: Float32Array) {
@@ -13,7 +13,58 @@ class CameraUniforms {
         this.floatView.set(mat, 0);
     }
 
-    // TODO-2: add extra functions to set values needed for light clustering here
+    // DONE-2: add extra functions to set values needed for light clustering here
+    set invViewProjMat(mat: Float32Array) {
+        // Set the inverse view-projection matrix
+        this.floatView.set(mat, 16);
+    }
+
+    set viewMat(mat: Float32Array) {
+        // Set the view matrix (16 elements)
+        this.floatView.set(mat, 32);
+    }
+
+    set invViewMat(mat: Float32Array) {
+        // Set the inverse view matrix (16 elements)
+        this.floatView.set(mat, 48);
+    }
+
+    set projMat(mat: Float32Array) {
+        // Set the projection matrix (16 elements)
+        this.floatView.set(mat, 64);
+    }
+
+    set invProjMat(mat: Float32Array) {
+        // Set the inverse projection matrix (16 elements)
+        this.floatView.set(mat, 80);
+    }
+
+    set nearPlane(value: number) {
+        // Set the near clipping plane
+        this.floatView[96] = value;
+    }
+
+    set farPlane(value: number) {
+        // Set the far clipping plane
+        this.floatView[97] = value;
+    }
+
+    set screenWidth(value: number) {
+        // Set the screen width
+        this.floatView[98] = value;
+    }
+
+    set screenHeight(value: number) {
+        // Set the screen height
+        this.floatView[99] = value;
+    }
+
+    set cameraPos(pos: Vec3) {
+        // Set the camera position (vec3f)
+        this.floatView[100] = pos[0];
+        this.floatView[101] = pos[1];
+        this.floatView[102] = pos[2];
+    }
 }
 
 export class Camera {
@@ -140,7 +191,17 @@ export class Camera {
         // DONE-1.1: set `this.uniforms.viewProjMat` to the newly calculated view proj mat
         this.uniforms.viewProjMat = viewProjMat;
 
-        // TODO-2: write to extra buffers needed for light clustering here
+        // DONE-2: write to extra buffers needed for light clustering here
+        this.uniforms.invViewProjMat = mat4.invert(viewProjMat);
+        this.uniforms.viewMat = viewMat;
+        this.uniforms.invViewMat = mat4.invert(viewMat);
+        this.uniforms.projMat = this.projMat;
+        this.uniforms.invProjMat = mat4.invert(this.projMat);
+        this.uniforms.nearPlane = -Camera.nearPlane;
+        this.uniforms.farPlane = -Camera.farPlane;
+        this.uniforms.screenWidth = canvas.width;
+        this.uniforms.screenHeight = canvas.height;
+        this.uniforms.cameraPos = this.cameraPos;
 
         // DONE-1.1: upload `this.uniforms.buffer` (host side) to `this.uniformsBuffer` (device side)
         // check `lights.ts` for examples of using `device.queue.writeBuffer()`
