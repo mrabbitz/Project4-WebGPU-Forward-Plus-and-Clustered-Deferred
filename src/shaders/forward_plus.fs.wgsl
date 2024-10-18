@@ -21,6 +21,8 @@
 @group(${bindGroup_material}) @binding(0) var diffuseTex: texture_2d<f32>;
 @group(${bindGroup_material}) @binding(1) var diffuseTexSampler: sampler;
 
+const EPSILON = 1e-5;
+
 struct FragmentInput
 {
     @location(0) pos: vec3f,
@@ -39,7 +41,9 @@ fn main(in: FragmentInput) -> @location(0) vec4f
     // Determine which cluster contains the current fragment
     let clip_pos = cameraUniforms.viewProjMat * vec4(in.pos, 1.0);
     let ndc_pos = clip_pos.xyz / clip_pos.w;
-    let ndc_pos_0_1 = ndc_pos * 0.5 + 0.5;
+    var ndc_pos_0_1 = ndc_pos * 0.5 + 0.5;
+    ndc_pos_0_1.x = clamp(ndc_pos_0_1.x, 0.0, 1.0 - EPSILON);
+    ndc_pos_0_1.y = clamp(ndc_pos_0_1.y, 0.0, 1.0 - EPSILON);
     let clusterIdx_x = u32(floor(ndc_pos_0_1.x * f32(clusterSet.clusterCountX)));
     let clusterIdx_y = u32(floor(ndc_pos_0_1.y * f32(clusterSet.clusterCountY)));
 
