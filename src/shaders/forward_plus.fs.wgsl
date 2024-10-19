@@ -57,7 +57,8 @@ fn main(in: FragmentInput) -> @location(0) vec4f
     var totalLightContribution = vec3f(0, 0, 0);
 
     // For each light in the cluster
-    for (var i = 0u; i < lightCount; i++) {
+    for (var i = 0u; i < lightCount; i++)
+    {
         // Access the light's properties using its index
         let light = lightSet.lights[cluster.lightIndices[i]];
         // Calculate the contribution of the light based on its position, the fragment’s position, and the surface normal
