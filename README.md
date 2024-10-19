@@ -9,12 +9,15 @@ WebGL Forward+ and Clustered Deferred Shading
 
 ### Live Demo
 http://mrabbitz.github.io/Project4-WebGPU-Forward-Plus-and-Clustered-Deferred
+
 **Your browser must support WebGPU** - check [here](https://webgpureport.org/)
+
 **For a list of browsers and versions that do/don't support WebGPU** - check [here](https://caniuse.com/webgpu)
+
 **You should also utilize your machine's high-performance GPU, if available**
 
 ### Demo GIF
-![](/img/clustered_deferred.gif)
+![](img/clustered_deferred.gif)
 
 ### References
 - [WebGPU Samples - Deferred Rendering](https://webgpu.github.io/webgpu-samples/?sample=deferredRendering)
