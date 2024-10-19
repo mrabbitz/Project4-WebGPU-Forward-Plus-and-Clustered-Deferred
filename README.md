@@ -16,7 +16,7 @@ http://mrabbitz.github.io/Project4-WebGPU-Forward-Plus-and-Clustered-Deferred
 
 **You should also utilize your machine's high-performance GPU, if available**
 
-### Demo 
+### Demo GIF
 **Note there is a loss of quality from GIF capture**
 ![](img/clustered_deferred.gif)
 
