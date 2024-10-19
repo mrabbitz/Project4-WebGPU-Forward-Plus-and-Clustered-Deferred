@@ -17,10 +17,8 @@ http://mrabbitz.github.io/Project4-WebGPU-Forward-Plus-and-Clustered-Deferred
 **You should also utilize your machine's high-performance GPU, if available**
 
 ### Demo 
-**Note there is a light loss of quality from GIF capture**
+**Note there is a loss of quality from GIF capture**
 ![](img/clustered_deferred.gif)
-![](img/clustered_deferred.mp4)
-![](img/clustered_deferred_clamped.mp4)
 
 ### References
 - [WebGPU Samples - Deferred Rendering](https://webgpu.github.io/webgpu-samples/?sample=deferredRendering)
