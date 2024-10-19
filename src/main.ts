@@ -54,8 +54,8 @@ function setRenderer(mode: string) {
     }
 }
 
-const renderModes = { naive: 'naive', forwardPlus: 'clustered forward', clusteredDeferred: 'clustered deferred' };
-let renderModeController = gui.add({ mode: renderModes.naive }, 'mode', Object.values(renderModes));
+const renderModes = { naive: 'Forward', forwardPlus: 'Clustered Forward', clusteredDeferred: 'Clustered Deferred' };
+let renderModeController = gui.add({ mode: renderModes.clusteredDeferred }, 'mode', Object.values(renderModes));
 renderModeController.onChange(setRenderer);
 
 setRenderer(renderModeController.getValue());

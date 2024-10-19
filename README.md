@@ -5,15 +5,19 @@ WebGL Forward+ and Clustered Deferred Shading
 
 * Michael Rabbitz
   * [LinkedIn](https://www.linkedin.com/in/mike-rabbitz)
-* Tested on: **Google Chrome 130.0** on
-  Windows 10, i7-9750H @ 2.60GHz 32GB, RTX 2060 6GB (Personal)
-
-### README in progress...check back soon!
+* Tested on: **Google Chrome 130.0** on Windows 10, i7-9750H @ 2.60GHz 32GB, RTX 2060 6GB (Personal)
 
 ### Live Demo
 http://mrabbitz.github.io/Project4-WebGPU-Forward-Plus-and-Clustered-Deferred
+**Your browser must support WebGPU** - check [here](https://webgpureport.org/)
+**For a list of browsers and versions that do/don't support WebGPU** - check [here](https://caniuse.com/webgpu)
+**You should also utilize your machine's high-performance GPU, if available**
 
-### Demo Video/GIF
+### Demo GIF
+![](/img/clustered_deferred.gif)
+
+### References
+- [WebGPU Samples - Deferred Rendering](https://webgpu.github.io/webgpu-samples/?sample=deferredRendering)
 
 ### Credits
 
