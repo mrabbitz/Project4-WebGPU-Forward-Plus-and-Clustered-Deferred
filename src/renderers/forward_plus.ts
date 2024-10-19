@@ -76,8 +76,6 @@ export class ForwardPlusRenderer extends renderer.Renderer {
                 ]
             }
         });
-
-
     }
 
     override draw() {

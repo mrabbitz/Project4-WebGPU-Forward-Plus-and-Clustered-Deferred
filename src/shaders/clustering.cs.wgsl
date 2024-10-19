@@ -25,13 +25,15 @@
 @group(${bindGroup_scene}) @binding(1) var<storage, read> lightSet: LightSet;
 @group(${bindGroup_scene}) @binding(2) var<storage, read_write> clusterSet: ClusterSet;
 
-struct ClusterBounds {
+struct ClusterBounds
+{
     aabbMin: vec3f,
     aabbMax: vec3f
-};
+}
 
 // Function to compute the AABB for a cluster in view space
-fn computeClusterBounds(clusterIdx: u32) -> ClusterBounds {
+fn computeClusterBounds(clusterIdx: u32) -> ClusterBounds
+{
     let clusterIdx_x: u32 = clusterIdx % clusterSet.clusterCountX;
     let clusterIdx_y: u32 = (clusterIdx / clusterSet.clusterCountX) % clusterSet.clusterCountY;
     let clusterIdx_z: u32 = clusterIdx / (clusterSet.clusterCountX * clusterSet.clusterCountY);
@@ -72,7 +74,8 @@ fn computeClusterBounds(clusterIdx: u32) -> ClusterBounds {
         vec4f(ndc_max_x, ndc_max_y, ndc_max_z, 1.0)
     );
 
-    for (var i = 0u; i < 8u; i++) {
+    for (var i = 0u; i < 8u; i++)
+    {
         let view_pos: vec4f = cameraUniforms.invProjMat * ndc_corners[i];
         let view_corner: vec3f = view_pos.xyz / view_pos.w;
         view_min = min(view_min, view_corner);
@@ -83,7 +86,8 @@ fn computeClusterBounds(clusterIdx: u32) -> ClusterBounds {
 }
 
 // Function to check if a light (as a sphere) intersects a cluster's AABB
-fn sphereAabbIntersectionTest(c: vec3f, r: f32, aabbMin: vec3f, aabbMax: vec3f) -> bool {
+fn sphereAabbIntersectionTest(c: vec3f, r: f32, aabbMin: vec3f, aabbMax: vec3f) -> bool
+{
     let closestPoint = clamp(c, aabbMin, aabbMax);
     // Returns true if the distance from the sphere center to the closest point on the AABB is less than or equal to the sphere's radius
     return length(c - closestPoint) <= r;
@@ -91,7 +95,8 @@ fn sphereAabbIntersectionTest(c: vec3f, r: f32, aabbMin: vec3f, aabbMax: vec3f) 
 
 @compute
 @workgroup_size(${clusteringWorkgroupSize})
-fn main(@builtin(global_invocation_id) globalIdx: vec3u) {
+fn main(@builtin(global_invocation_id) globalIdx: vec3u)
+{
     let clusterIdx: u32 = globalIdx.x;
     if (clusterIdx >= clusterSet.clusterCount) {
         return;
@@ -117,17 +122,22 @@ fn main(@builtin(global_invocation_id) globalIdx: vec3u) {
     // var cluster_lightIndices: array<u32, ${maxLightsPerCluster}> = array<u32, ${maxLightsPerCluster}>();
 
     // For each light
-    for (var lightIdx: u32 = 0u; lightIdx < lightSet.numLights; lightIdx++) {
+    for (var lightIdx: u32 = 0u; lightIdx < lightSet.numLights; lightIdx++)
+    {
         let view_light_pos: vec4f = cameraUniforms.viewMat * vec4f(lightSet.lights[lightIdx].pos, 1.0);
 
         // Check if the light intersects with the cluster’s bounding box (AABB)
-        if (sphereAabbIntersectionTest(view_light_pos.xyz, ${lightRadius}, aabbMin, aabbMax)) {
+        if (sphereAabbIntersectionTest(view_light_pos.xyz, ${lightRadius}, aabbMin, aabbMax))
+        {
             // Add this light to the cluster's light list if there is space
-            if (cluster_lightCount < ${maxLightsPerCluster}) {
+            if (cluster_lightCount < ${maxLightsPerCluster})
+            {
                 // cluster_lightIndices[cluster_lightCount] = lightIdx;
                 clusterSet.clusters[clusterIdx].lightIndices[cluster_lightCount] = lightIdx;
                 cluster_lightCount++;
-            } else {
+            }
+            else
+            {
                 // Stop early if the cluster's light list is full
                 break;
             }
