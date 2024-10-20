@@ -36,44 +36,34 @@ Three rendering methods are implemented:
 In modern rendering, Forward Rendering and Deferred Rendering are two common approaches used to handle scene lighting and shading.
 Each has its strengths and weaknesses, depending on the complexity of the scene, especially in terms of how many lights need to be processed.
 
-**Forward Rendering**
+##### Forward Rendering
 
-Forward rendering is the default method, where each object in the scene is drawn one by one, and lighting is calculated per object using shaders.
-Every object is rendered directly to the screen, and all the necessary lighting and shading calculations are done in a single pass.
-
-**Advantages:**
-
-- **Simplicity:** Forward rendering is straightforward to implement and understand.
-
-- **Flexibility:** Allows for full-quality shaders and effects to be applied to each object, with no restriction on the type or complexity of shaders used.
-
-**Disadvantages:**
-
-- **Overdraw:** One of the biggest drawbacks is overdraw, where multiple objects get drawn on top of each other. Each time an overlapping object is drawn, the GPU re-runs the expensive lighting and shading calculations, even though only the top-most pixel is visible. This becomes inefficient, especially in scenes with many overlapping objects.
-
-- **Lighting performance:** As the number of lights in the scene increases, the performance can degrade significantly because every light needs to be calculated per object.
-
-
-**Deferred Rendering**
-
-Deferred rendering addresses some of the inefficiencies of forward rendering, particularly overdraw, by splitting the rendering process into two major passes:
-
-**Geometry Pass (G-buffer Creation):** In the first pass, instead of calculating the final shaded output for each object immediately, the renderer outputs basic scene information - such as pixel color, normals, depth (z-position), and other data - into a set of screen-sized buffers called the G-buffer.
-
-**Lighting Pass:** Once the scene's geometry has been processed into the G-buffer, the second pass uses this data to calculate lighting only for the pixels that are visible on the screen. Each pixel’s final lighting is processed exactly once, regardless of how many objects overlap in that pixel.
+Forward rendering is the standard, out-of-the-box method that most rendering engines use. In this pipeline, the GPU processes each object (or geometry) one by one.
+Each object is projected, broken down into vertices, and then transformed into fragments (pixels).
+These fragments are fully shaded and processed, one at a time, to produce the final image that appears on the screen.
 
 **Advantages:**
-
-- **No Overdraw:** Deferred rendering eliminates the issue of overdraw. Since lighting calculations are only done in the lighting pass, the GPU doesn’t waste time on objects that are hidden behind others.
-
-- **Scalable with many lights:** Deferred rendering is well-suited for scenes with many lights, as the cost of processing lights is decoupled from the number of objects in the scene. Lights only affect the pixels they overlap in screen space.
+- **Simplicity:** Forward rendering is straightforward to implement and understand, making it suitable for simpler scenes and engines.
+- **Flexibility:** Each object can use different, high-quality shaders and effects, without restrictions. Forward rendering allows for full per-object customization.
 
 **Disadvantages:**
+- **Overdraw:** Forward rendering can become inefficient in scenes where objects overlap, as it recalculates lighting and shading for each object even if only the top-most fragment (pixel) is visible. This redundancy wastes processing power.
+- **Lighting performance:** Lighting calculations must be performed for every visible fragment of every object, and for every light in the scene. As the number of lights or objects increases, the computational cost grows exponentially.
 
-- **High memory usage:** The G-buffer requires a large amount of memory since it stores detailed information for every pixel in the scene. This can be especially demanding on memory bandwidth and can be a bottleneck on lower-end GPUs.
 
+##### Deferred Rendering
+
+Deferred rendering takes a different approach by postponing (or deferring) the lighting calculations until after all objects have been processed. Instead of shading each object as it's rendered, deferred rendering separates the geometry and lighting stages into two passes:
+**1) Geometry Pass (G-buffer Creation):** All objects are first rendered into several screen-sized buffers called the G-buffer. These buffers store per-pixel data like color, normals, depth (z-position), and other information needed for shading, but lighting is not calculated in this pass.
+**2) Lighting Pass:** After the entire scene has been rendered into the G-buffer, lighting calculations are performed only for the visible pixels (fragments) in the final image. This process ensures that each pixel is shaded only once, regardless of how many objects overlap or how complex the scene is.
+
+**Advantages:**
+- **No Overdraw:** Deferred rendering eliminates overdraw by calculating lighting only for visible pixels. Even in scenes with overlapping objects, each pixel is processed only once.
+- **Scalable with many lights:** The lighting calculations are decoupled from the number of objects, meaning the performance mainly depends on screen resolution and the number of lights.
+
+**Disadvantages:**
+- **High memory usage:** The G-buffer requires significant memory bandwidth, as it stores detailed data for every pixel. This can be a bottleneck for older or lower-end GPUs.
 - **Limited flexibility:** Since the G-buffer stores pre-defined data like color, normals, and depth, it can be challenging to handle certain effects, such as transparency or custom shading techniques. Deferred rendering can struggle with effects like refractions or transparency that depend on information from multiple layers of geometry.
-
 - **Complex shaders:** The lighting pass typically requires an "uber shader" that can handle all the various lighting and shading models for the scene, which can make the shader complex and harder to manage.
 
 
