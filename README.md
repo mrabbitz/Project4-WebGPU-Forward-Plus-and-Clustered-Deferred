@@ -140,8 +140,9 @@ At and above 200 MLPC (about 10% of the scene light count), the LOQ stabilizes, 
 Don't take this as a hard rule, though, as different scenes may produce different results.
 FPS declines steadily from 64 to 30 as MLPC increases from 200 to 500, reflecting the trade-off between performance and visual quality.
 
-For static light counts, even with moving lights, tweaking the MLPC can help balance performance and quality.
-In dynamic scenes, dynamic MLPC adjustment per rendering pass might offer improvements, though further testing is needed to determine the overhead.
+Takeaway 1: For static light counts, even with moving lights, tweaking the MLPC can help balance performance and quality.
+
+Takeaway 2: In dynamic scenes, dynamic MLPC adjustment per rendering pass might offer improvements, though further testing is needed to determine the overhead.
 
 
 ## References
