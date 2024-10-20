@@ -32,7 +32,7 @@ Three rendering methods are implemented:
 
 ### Rendering Methods Overview
 
-#### Forward (Naive) Rendering
+#### Forward Rendering (Naive)
 Forward Rendering is the standard, straightforward method commonly employed by rendering engines. In this pipeline, the GPU processes each object sequentially, converting them into fragments (pixels) while calculating lighting for every visible fragment from all lights in the scene. This approach can become inefficient as the number of lights increases, leading to redundant calculations for overlapping objects.
 
 **Advantages:**
