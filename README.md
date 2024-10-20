@@ -74,9 +74,10 @@ This method optimizes rendering performance for scenes with many dynamic lights 
 
 ## Part 3: Performance Analysis
 **Terms**
-- Frames Per Second (FPS): the measurment of performance in this section. FPS is measured using [stats.js](https://github.com/mrdoob/stats.js).
-- Max Lights Per Cluster (MLPC): represents the allocated buffer size for a given 3D cluster such that up to this number can be represented in a cluster. 
-- Loss of Quality (LOQ): when the accurate representation of the scene is diminished.
+- **Max Lights Per Cluster (MLPC):** Refers to the maximum number of lights that can be stored in each 3D cluster for Clustered rendering methods.
+A higher MLPC allows for more lights per cluster but can increase the memory footprint and reduce performance.
+- **Frames Per Second (FPS):** The primary metric used to measure performance in this section. FPS is measured using [stats.js](https://github.com/mrdoob/stats.js).
+- **Loss of Quality (LOQ):** The degradation of visual quality in rendering, including inaccuracies in lighting and potential artifacts.
 
 ### 3.1: FPS vs Scene Light Count
 **Section 3.1 fixed variables: MLPC of 512**
@@ -96,24 +97,52 @@ This method optimizes rendering performance for scenes with many dynamic lights 
 | 4,500             | < 1                 | 5                    | 26                     |
 | 5,000             | < 1                 | 5                    | 25                     |
 
+**Analysis**
+
+Forward rendering shows poor performance, struggling even at 500 lights and becoming unusable at higher counts, dipping below 1 FPS by 3,500 lights.
+This makes Forward impractical for scenes with many dynamic lights.
+
+Clustered Forward rendering demonstrates more stability, maintaining 5-7 FPS regardless of the light count, showcasing the benefits of spatial partitioning.
+However, it still lags behind Clustered Deferred in overall performance.
+
+Clustered Deferred rendering offers the best performance, with FPS declining gradually as light count increases.
+Even at 5,000 lights, it sustains 25 FPS, making it the most suitable for scenes with many lights, where maintaining performance is critical.
+
+
 ### 3.2 FPS vs Max Lights Per Cluster (MLPC)
 **Section 3.2 fixed variables: Scene Light Count of 2048**
 
 ![](img/fps_mlpc.png)
 
 
-| MLPC | Clustered Deferred FPS | LOQ - Lighting | LOQ - Tiling |
-| ---- | ---------------------- | -------------- | ------------ |
-| 50   | 157                    | Y              | Y            |
-| 100  | 78                     | Y              | Y            |
-| 150  | 73                     | Maybe          | Y            |
-| 200  | 64                     | N              | N            |
-| 250  | 57                     | N              | N            |
-| 300  | 52                     | N              | N            |
-| 350  | 46                     | N              | N            |
-| 400  | 40                     | N              | N            |
-| 450  | 34                     | N              | N            |
-| 500  | 30                     | N              | N            |
+| MLPC | Clustered Deferred FPS | LOQ - Lighting | LOQ - Tiling artifact |
+| ---- | ---------------------- | -------------- | --------------------- |
+| 50   | 157                    | Y              | Y                     |
+| 100  | 78                     | Y              | Y                     |
+| 150  | 73                     | Maybe          | Y                     |
+| 200  | 64                     | N              | N                     |
+| 250  | 57                     | N              | N                     |
+| 300  | 52                     | N              | N                     |
+| 350  | 46                     | N              | N                     |
+| 400  | 40                     | N              | N                     |
+| 450  | 34                     | N              | N                     |
+| 500  | 30                     | N              | N                     |
+
+**Analysis**
+
+As MLPC increases, FPS decreases due to the added memory and computational load of handling more lights per cluster.
+However, LOQ also decreases, with lighting inaccuracies and tiling artifacts reducing as MLPC rises.
+
+At MLPC values below 10% of the scene light count, noticeable lighting inaccuracies and artifacts occur.
+At 50 MLPC, FPS is high, but visual quality is poor.
+
+At and above 200 MLPC (about 10% of the scene light count), the LOQ stabilizes, indicating this is the point where the renderer can accurately handle the scene's lighting.
+Don't take this as a hard rule, though, as different scenes may produce different results.
+FPS declines steadily from 64 to 30 as MLPC increases from 200 to 500, reflecting the trade-off between performance and visual quality.
+
+For static light counts, even with moving lights, tweaking the MLPC can help balance performance and quality.
+In dynamic scenes, dynamic MLPC adjustment per rendering pass might offer improvements, though further testing is needed to determine the overhead.
+
 
 ## References
 - [WebGPU Samples - Deferred Rendering](https://webgpu.github.io/webgpu-samples/?sample=deferredRendering)
