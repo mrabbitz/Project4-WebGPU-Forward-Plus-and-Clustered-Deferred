@@ -133,7 +133,7 @@ Even at 5,000 lights, it sustains 25 FPS, making it the most suitable for scenes
 As MLPC increases, FPS decreases due to the added memory and computational load of handling more lights per cluster.
 However, LOQ also decreases, with lighting inaccuracies and tiling artifacts reducing as MLPC rises.
 
-At MLPC values below 10% of the scene light count, noticeable lighting inaccuracies and artifacts occur.
+At MLPC values below 10% of the scene light count, noticeable lighting inaccuracies and tiling artifacts occur.
 At 50 MLPC, FPS is high, but visual quality is poor.
 
 At and above 200 MLPC (about 10% of the scene light count), the LOQ stabilizes, indicating this is the point where the renderer can accurately handle the scene's lighting.
