@@ -115,18 +115,18 @@ Even at 5,000 lights, it sustains 25 FPS, making it the most suitable for scenes
 ![](img/fps_mlpc.png)
 
 
-| MLPC | Clustered Deferred FPS | LOQ - Lighting | LOQ - Tiling artifact |
-| ---- | ---------------------- | -------------- | --------------------- |
-| 50   | 157                    | Y              | Y                     |
-| 100  | 78                     | Y              | Y                     |
-| 150  | 73                     | Maybe          | Y                     |
-| 200  | 64                     | N              | N                     |
-| 250  | 57                     | N              | N                     |
-| 300  | 52                     | N              | N                     |
-| 350  | 46                     | N              | N                     |
-| 400  | 40                     | N              | N                     |
-| 450  | 34                     | N              | N                     |
-| 500  | 30                     | N              | N                     |
+| MLPC | Clustered Deferred FPS | LOQ - Lighting | LOQ - Tiling artifacts |
+| ---- | ---------------------- | -------------- | ---------------------- |
+| 50   | 157                    | Y              | Y                      |
+| 100  | 78                     | Y              | Y                      |
+| 150  | 73                     | Maybe          | Y                      |
+| 200  | 64                     | N              | N                      |
+| 250  | 57                     | N              | N                      |
+| 300  | 52                     | N              | N                      |
+| 350  | 46                     | N              | N                      |
+| 400  | 40                     | N              | N                      |
+| 450  | 34                     | N              | N                      |
+| 500  | 30                     | N              | N                      |
 
 **Analysis**
 
