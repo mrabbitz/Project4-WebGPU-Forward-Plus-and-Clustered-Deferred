@@ -1,4 +1,4 @@
-WebGPU Forward, Clustered Forward, and Clustered Deferred Shading
+WebGPU Forward, Clustered Forward, and Clustered Deferred Rendering
 ======================
 
 **University of Pennsylvania, CIS 5650: GPU Programming and Architecture, Project 4**
