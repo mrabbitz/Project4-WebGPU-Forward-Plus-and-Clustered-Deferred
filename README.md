@@ -36,7 +36,7 @@ Three rendering methods are implemented:
 In modern rendering, Forward Rendering and Deferred Rendering are two common approaches used to handle scene lighting and shading.
 Each has its strengths and weaknesses, depending on the complexity of the scene, especially in terms of how many lights need to be processed.
 
-##### Forward Rendering
+**Forward Rendering**
 
 Forward rendering is the standard, out-of-the-box method that most rendering engines use. In this pipeline, the GPU processes each object (or geometry) one by one.
 Each object is projected, broken down into vertices, and then transformed into fragments (pixels).
@@ -51,11 +51,12 @@ These fragments are fully shaded and processed, one at a time, to produce the fi
 - **Lighting performance:** Lighting calculations must be performed for every visible fragment of every object, and for every light in the scene. As the number of lights or objects increases, the computational cost grows exponentially.
 
 
-##### Deferred Rendering
+**Deferred Rendering**
 
 Deferred rendering takes a different approach by postponing (or deferring) the lighting calculations until after all objects have been processed. Instead of shading each object as it's rendered, deferred rendering separates the geometry and lighting stages into two passes:
-**1) Geometry Pass (G-buffer Creation):** All objects are first rendered into several screen-sized buffers called the G-buffer. These buffers store per-pixel data like color, normals, depth (z-position), and other information needed for shading, but lighting is not calculated in this pass.
-**2) Lighting Pass:** After the entire scene has been rendered into the G-buffer, lighting calculations are performed only for the visible pixels (fragments) in the final image. This process ensures that each pixel is shaded only once, regardless of how many objects overlap or how complex the scene is.
+
+1) **Geometry Pass (G-buffer Creation):** All objects are first rendered into several screen-sized buffers called the G-buffer. These buffers store per-pixel data like color, normals, depth (z-position), and other information needed for shading, but lighting is not calculated in this pass.
+2) **Lighting Pass:** After the entire scene has been rendered into the G-buffer, lighting calculations are performed only for the visible pixels (fragments) in the final image. This process ensures that each pixel is shaded only once, regardless of how many objects overlap or how complex the scene is.
 
 **Advantages:**
 - **No Overdraw:** Deferred rendering eliminates overdraw by calculating lighting only for visible pixels. Even in scenes with overlapping objects, each pixel is processed only once.
