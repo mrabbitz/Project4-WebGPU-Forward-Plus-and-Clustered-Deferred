@@ -26,9 +26,9 @@ This project explores multiple rendering techniques using WebGPU, focusing on ho
 The goal is to compare and contrast the performance and implementation complexity of different approaches, particularly when scaling up the number of lights in a scene.
 
 Three rendering methods are implemented:
-- Forward (Naive)
-- Clustered Forward
-- Clustered Deferred
+- **Forward (Naive)**
+- **Clustered Forward**
+- **Clustered Deferred**
 
 ### Rendering Methods Overview
 
