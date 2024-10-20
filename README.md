@@ -55,7 +55,7 @@ This technique allows the GPU to efficiently determine which lights affect each 
 - **Scalability:** Handles increased light counts effectively, maintaining performance.
 
 **Disadvantages:**
-- **Complexity:** More complex to implement than naive forward rendering, requiring additional data structures for clustering.
+- **Complexity:** More complex to implement than naive forward rendering, requiring additional data structures and compute shaders for clustering.
 - **Memory Overhead:** Introduces some memory overhead for storing cluster information.
 
 ### Clustered Deferred Rendering
