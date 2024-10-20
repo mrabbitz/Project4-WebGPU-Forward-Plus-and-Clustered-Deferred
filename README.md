@@ -42,7 +42,7 @@ These fragments are fully shaded and processed, one at a time, to produce the fi
 - **Flexibility:** Supports diverse, high-quality shaders and effects for each object.
 
 **Disadvantages:**
-- **Overdraw:** Inefficient in scenes with overlapping objects, as it recalculates lighting for every fragment with overlappiing objects, wasting resources.
+- **Overdraw:** Inefficient in scenes with overlapping objects, as it recalculates lighting for every fragment with overlapping objects, wasting resources.
 - **Lighting Performance:** Requires lighting calculations for every fragment of every object, resulting in exponential computational costs as the number of lights or objects increases.
 
 #### Clustered Forward Rendering
