@@ -30,9 +30,9 @@ Three rendering methods are implemented:
 - **Clustered Forward**
 - **Clustered Deferred**
 
-### Rendering Methods Overview
+## Part 2: Rendering Methods Overview
 
-#### Forward Rendering (Naive)
+### Forward Rendering (Naive)
 Forward Rendering is the standard method that most rendering engines use.
 In this pipeline, the GPU processes each object (or geometry) sequentially.
 Each object is projected, broken down into vertices, and transformed into fragments (pixels).
@@ -46,7 +46,7 @@ These fragments are fully shaded and processed one at a time to produce the fina
 - **Overdraw:** Inefficient in scenes with overlapping objects, as it recalculates lighting for every fragment, wasting resources.
 - **High Lighting Cost:** Requires lighting calculations for every fragment, leading to exponential computational costs as the number of lights increases.
 
-#### Clustered Forward Rendering
+### Clustered Forward Rendering
 Clustered Forward Rendering improves the traditional forward method by organizing lights into 3D clusters based on their positions in view space.
 This technique allows the GPU to efficiently determine which lights affect each fragment, significantly reducing the number of lighting calculations needed.
 
@@ -58,7 +58,7 @@ This technique allows the GPU to efficiently determine which lights affect each 
 - **Complexity:** More complex to implement than naive forward rendering, requiring additional data structures for clustering.
 - **Memory Overhead:** Introduces some memory overhead for storing cluster information.
 
-#### Clustered Deferred Rendering
+### Clustered Deferred Rendering
 Clustered Deferred Rendering combines the advantages of deferred rendering with clustered light management.
 In this approach, geometry is processed in one pass to create a G-buffer, followed by a separate lighting pass that calculates lighting only for the relevant fragments.
 This method optimizes rendering performance for scenes with many dynamic lights by minimizing overdraw and enabling efficient light calculations.
@@ -71,6 +71,8 @@ This method optimizes rendering performance for scenes with many dynamic lights 
 - **High Memory Usage:** The G-buffer requires significant memory bandwidth, which can be a bottleneck for lower-end GPUs.
 - **Limited Flexibility:** Challenges in handling effects like transparency or custom shading due to pre-defined G-buffer data.
 - **Complex Shaders:** Requires an "uber shader" for the lighting pass, which can become complex and harder to manage.
+
+## Part 3: Performance Analysis
 
 
 ## References
