@@ -42,8 +42,8 @@ These fragments are fully shaded and processed, one at a time, to produce the fi
 - **Flexibility:** Supports diverse, high-quality shaders and effects for each object.
 
 **Disadvantages:**
--**Overdraw:** Inefficient in scenes with overlapping objects, as it recalculates lighting for every fragment, wasting resources.
--**Lighting Performance:** Requires lighting calculations for every fragment of every object, resulting in exponential computational costs as the number of lights or objects increases.
+- **Overdraw:** Inefficient in scenes with overlapping objects, as it recalculates lighting for every fragment, wasting resources.
+- **Lighting Performance:** Requires lighting calculations for every fragment of every object, resulting in exponential computational costs as the number of lights or objects increases.
 
 #### Clustered Forward Rendering
 Clustered Forward Rendering enhances the traditional forward method by organizing lights into 3D clusters based on their positions in view space. This technique allows the GPU to efficiently determine which lights affect each fragment, significantly reducing the number of lighting calculations required. As a result, it improves performance in complex scenes with a high density of lights.
