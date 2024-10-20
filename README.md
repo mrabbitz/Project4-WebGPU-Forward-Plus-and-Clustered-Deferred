@@ -73,7 +73,47 @@ This method optimizes rendering performance for scenes with many dynamic lights 
 - **Complex Shaders:** Requires an "uber shader" for the lighting pass, which can become complex and harder to manage.
 
 ## Part 3: Performance Analysis
+**Terms**
+- Frames Per Second (FPS): the measurment of performance in this section. FPS is measured using [stats.js](https://github.com/mrdoob/stats.js).
+- Max Lights Per Cluster (MLPC): represents the allocated buffer size for a given 3D cluster such that up to this number can be represented in a cluster. 
+- Loss of Quality (LOQ): when the accurate representation of the scene is diminished.
 
+### 3.1: FPS vs Scene Light Count
+**Section 3.1 fixed variables: MLPC of 512**
+
+![](img/fps_lightCount.png)
+
+| Scene Light Count | Forward (Naive) FPS | Clusterd Forward FPS | Clustered Deferred FPS |
+| ----------------- | ------------------- | -------------------- | ---------------------- |
+| 500               | 13                  | 7                    | 35                     |
+| 1,000             | 6                   | 6                    | 32                     |
+| 1,500             | 4                   | 6                    | 31                     |
+| 2,000             | 3                   | 6                    | 30                     |
+| 2,500             | 2                   | 6                    | 29                     |
+| 3,000             | 1                   | 6                    | 28                     |
+| 3,500             | < 1                 | 5                    | 27                     |
+| 4,000             | < 1                 | 5                    | 26                     |
+| 4,500             | < 1                 | 5                    | 26                     |
+| 5,000             | < 1                 | 5                    | 25                     |
+
+### 3.2 FPS vs Max Lights Per Cluster (MLPC)
+**Section 3.2 fixed variables: Scene Light Count of 2048**
+
+![](img/fps_mlpc.png)
+
+
+| MLPC | Clustered Deferred FPS | LOQ - Lighting | LOQ - Tiling |
+| ---- | ---------------------- | -------------- | ------------ |
+| 50   | 157                    | Y              | Y            |
+| 100  | 78                     | Y              | Y            |
+| 150  | 73                     | Maybe          | Y            |
+| 200  | 64                     | N              | N            |
+| 250  | 57                     | N              | N            |
+| 300  | 52                     | N              | N            |
+| 350  | 46                     | N              | N            |
+| 400  | 40                     | N              | N            |
+| 450  | 34                     | N              | N            |
+| 500  | 30                     | N              | N            |
 
 ## References
 - [WebGPU Samples - Deferred Rendering](https://webgpu.github.io/webgpu-samples/?sample=deferredRendering)
