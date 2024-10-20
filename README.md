@@ -109,7 +109,7 @@ Clustered Deferred rendering offers the best performance, with FPS declining gra
 Even at 5,000 lights, it sustains 25 FPS, making it the most suitable for scenes with many lights, where maintaining performance is critical.
 
 
-### 3.2 FPS vs Max Lights Per Cluster (MLPC)
+### 3.2: FPS vs Max Lights Per Cluster (MLPC)
 **Section 3.2 fixed variables: Scene Light Count of 2048**
 
 ![](img/fps_mlpc.png)
