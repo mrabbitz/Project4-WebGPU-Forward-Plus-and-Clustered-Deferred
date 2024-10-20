@@ -32,49 +32,39 @@ Three rendering methods are implemented:
 
 ### Rendering Methods Overview
 
-#### Forward vs Deferred Rendering
-In modern rendering, Forward Rendering and Deferred Rendering are two common approaches used to handle scene lighting and shading.
-Each has its strengths and weaknesses, depending on the complexity of the scene, especially in terms of how many lights need to be processed.
-
-**Forward Rendering**
-
-Forward rendering is the standard, out-of-the-box method that most rendering engines use. In this pipeline, the GPU processes each object (or geometry) one by one.
-Each object is projected, broken down into vertices, and then transformed into fragments (pixels).
-These fragments are fully shaded and processed, one at a time, to produce the final image that appears on the screen.
+#### Forward (Naive) Rendering
+Forward Rendering is the standard, straightforward method commonly employed by rendering engines. In this pipeline, the GPU processes each object sequentially, converting them into fragments (pixels) while calculating lighting for every visible fragment from all lights in the scene. This approach can become inefficient as the number of lights increases, leading to redundant calculations for overlapping objects.
 
 **Advantages:**
-- **Simplicity:** Forward rendering is straightforward to implement and understand, making it suitable for simpler scenes and engines.
-- **Flexibility:** Each object can use different, high-quality shaders and effects, without restrictions. Forward rendering allows for full per-object customization.
+- **Simplicity:** Easy to implement and understand, ideal for simpler scenes.
+- **Flexibility:** Supports diverse, high-quality shaders and effects for each object.
 
 **Disadvantages:**
-- **Overdraw:** Forward rendering can become inefficient in scenes where objects overlap, as it recalculates lighting and shading for each object even if only the top-most fragment (pixel) is visible. This redundancy wastes processing power.
-- **Lighting performance:** Lighting calculations must be performed for every visible fragment of every object, and for every light in the scene. As the number of lights or objects increases, the computational cost grows exponentially.
+-**Overdraw:** Inefficient in scenes with overlapping objects, as it recalculates lighting for every fragment, wasting resources.
+-**Lighting Performance:** Requires lighting calculations for every fragment of every object, resulting in exponential computational costs as the number of lights or objects increases.
 
-
-**Deferred Rendering**
-
-Deferred rendering takes a different approach by postponing (or deferring) the lighting calculations until after all objects have been processed. Instead of shading each object as it's rendered, deferred rendering separates the geometry and lighting stages into two passes:
-
-1) **Geometry Pass (G-buffer Creation):** All objects are first rendered into several screen-sized buffers called the G-buffer. These buffers store per-pixel data like color, normals, depth (z-position), and other information needed for shading, but lighting is not calculated in this pass.
-2) **Lighting Pass:** After the entire scene has been rendered into the G-buffer, lighting calculations are performed only for the visible pixels (fragments) in the final image. This process ensures that each pixel is shaded only once, regardless of how many objects overlap or how complex the scene is.
+#### Clustered Forward Rendering
+Clustered Forward Rendering enhances the traditional forward method by organizing lights into 3D clusters based on their positions in view space. This technique allows the GPU to efficiently determine which lights affect each fragment, significantly reducing the number of lighting calculations required. As a result, it improves performance in complex scenes with a high density of lights.
 
 **Advantages:**
-- **No Overdraw:** Deferred rendering eliminates overdraw by calculating lighting only for visible pixels. Even in scenes with overlapping objects, each pixel is processed only once.
-- **Scalable with many lights:** The lighting calculations are decoupled from the number of objects, meaning the performance mainly depends on screen resolution and the number of lights.
+- **Efficient Light Management:** Reduces the number of lights processed per fragment, improving performance in complex scenes.
+- **Scalability:** Effectively handles increased light counts without significantly impacting performance.
 
 **Disadvantages:**
-- **High memory usage:** The G-buffer requires significant memory bandwidth, as it stores detailed data for every pixel. This can be a bottleneck for older or lower-end GPUs.
-- **Limited flexibility:** Since the G-buffer stores pre-defined data like color, normals, and depth, it can be challenging to handle certain effects, such as transparency or custom shading techniques. Deferred rendering can struggle with effects like refractions or transparency that depend on information from multiple layers of geometry.
-- **Complex shaders:** The lighting pass typically requires an "uber shader" that can handle all the various lighting and shading models for the scene, which can make the shader complex and harder to manage.
+- **Complexity:** More complex to implement than naive forward rendering, requiring additional data structures for clustering.
+- **Memory Overhead:** Introduces some memory overhead for storing cluster information.
 
+#### Clustered Deferred Rendering
+Clustered Deferred Rendering combines the advantages of deferred rendering with clustered light management. In this approach, geometry is processed in one pass to create a G-buffer, followed by a separate lighting pass that calculates lighting only for the relevant fragments. This method optimizes rendering performance for scenes with many dynamic lights by minimizing overdraw and enabling efficient light calculations, regardless of scene complexity.
 
+**Advantages:**
+- **No Overdraw:** Calculates lighting only for visible pixels, processing each pixel once, regardless of object overlap.
+- **Scalable:** Performance is primarily dependent on screen resolution and the number of lights, rather than the object count.
 
-#### Naive, Tiled, and Clustered Techniques
-
-
-
-
-
+**Disadvantages:**
+- **High Memory Usage:** The G-buffer requires significant memory bandwidth, which can be a bottleneck for lower-end GPUs.
+- **Limited Flexibility:** Challenges in handling effects like transparency or custom shading due to pre-defined G-buffer data.
+- **Complex Shaders:** Requires an "uber shader" for the lighting pass, which can become complex and harder to manage.
 
 
 ## References
