@@ -50,8 +50,8 @@ fn main(in: FragmentInput) -> @location(0) vec4f
     let clusterIdx = clamp(clusterIdx_x + (clusterIdx_y * clusterSet.clusterCountX) + (clusterIdx_z * clusterSet.clusterCountX * clusterSet.clusterCountY), 0, clusterSet.clusterCount - 1);
 
     // Retrieve the number of lights that affect the current fragment from the cluster’s data
-    let cluster = clusterSet.clusters[clusterIdx];
-    let lightCount = cluster.lightCount;
+    // let cluster = clusterSet.clusters[clusterIdx];
+    let lightCount = clusterSet.clusters[clusterIdx].lightCount;
 
     // Initialize a variable to accumulate the total light contribution for the fragment
     var totalLightContribution = vec3f(0, 0, 0);
@@ -60,7 +60,7 @@ fn main(in: FragmentInput) -> @location(0) vec4f
     for (var i = 0u; i < lightCount; i++)
     {
         // Access the light's properties using its index
-        let light = lightSet.lights[cluster.lightIndices[i]];
+        let light = lightSet.lights[clusterSet.clusters[clusterIdx].lightIndices[i]];
         // Calculate the contribution of the light based on its position, the fragment’s position, and the surface normal
         // Add the calculated contribution to the total light accumulation
         totalLightContribution += calculateLightContrib(light, in.pos, in.nor);
